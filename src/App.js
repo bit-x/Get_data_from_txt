@@ -66,6 +66,7 @@ const FileData = ({ fileName, fileData }) => {
 
 const AllStatisticTable = ({filesData}) => {
   const [tableData, setTableData] = useState([]);
+  const [spendingsAll, setSpendingsAll] = useState(0);
   let tableDataArray = [];
 
   useEffect(() => {
@@ -84,6 +85,7 @@ const AllStatisticTable = ({filesData}) => {
           tableDataArray[1] += +clicks.split(':')[1];
           tableDataArray[2] += !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10);
           tableDataArray[3] += parseFloat(spendings.replace(',', '.'));
+          setSpendingsAll(tableDataArray[3]);
         }
       } else {
     const allTablesData = [[]]
@@ -102,7 +104,7 @@ const AllStatisticTable = ({filesData}) => {
 
     allTablesData.splice(-2);
     const bigTable = allTablesData[allTablesData.length - 1];
-    tableDataArray[4] = (+bigTable[bigTable.length - 1][0].split(" ")[0] - tableDataArray[3]) + " руб.";
+    tableDataArray[4] = (+bigTable[bigTable.length - 1][0].split(" ")[0] - spendingsAll) + " руб.";
       }
     })
     setTableData(tableDataArray);
