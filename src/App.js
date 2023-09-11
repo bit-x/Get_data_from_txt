@@ -64,6 +64,81 @@ const FileData = ({ fileName, fileData }) => {
   );
 };
 
+const AllStatisticTable = ({filesData}) => {
+  const [tableData, setTableData] = useState([]);
+  let tableDataArray = [];
+
+  useEffect(() => {
+    filesData.map(({ fileName, fileData }) => {
+      if (!fileName.includes('statistic_pb')) {
+        const lines = fileData.split('\n');
+        const lastLine = lines[lines.length - 2]; // Игнорируем последнюю пустую строку
+        const entries = lastLine.split('||').map(entry => entry.trim());
+        const [date, impressions, clicks, conversions, spend] = entries;
+        const spendings = spend.split(':')[1];
+        const impr = impressions.split(':')[1];
+        if (tableDataArray.length === 0) {
+          tableDataArray = [+impr.replace(/\s/g, ""), +clicks.split(':')[1], !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10), parseFloat(spendings.replace(',', '.'))];
+        } else {
+          tableDataArray[0] += +impr.replace(/\s/g, "");
+          tableDataArray[1] += +clicks.split(':')[1];
+          tableDataArray[2] += !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10);
+          tableDataArray[3] += parseFloat(spendings.replace(',', '.'));
+        }
+      } else {
+    const allTablesData = [[]]
+    fileData = fileData.replace(/\s+\|\|/g, '||');
+    const lines = fileData.split('\n');
+    const rows = lines.map(line => line.split('||').map(entry => entry.trim()));
+
+    rows.forEach((el, index) => {
+      const last = allTablesData.length - 1;
+      if (el[0] === '') {
+        allTablesData.push([]);
+      } else {
+        allTablesData[last].push(el);
+      }
+    })
+
+    allTablesData.splice(-2);
+    const bigTable = allTablesData[allTablesData.length - 1];
+    tableDataArray[4] = (+bigTable[bigTable.length - 1][0].split(" ")[0] - tableDataArray[3]) + " руб.";
+      }
+    })
+    setTableData(tableDataArray);
+  }, [tableData]);
+
+  return (
+    <div className="bg-white rounded-md shadow-md p-4 mb-4">
+      <h2 className="text-xl font-bold mb-4 text-center">Общая статистика по сайтам</h2>
+      <div className="overflow-x-auto">
+      <table className="w-full table-auto border-collapse">
+        <thead>
+          <tr>
+            <th className="p-2 border">Показы</th>
+            <th className="p-2 border">Клики</th>
+            <th className="p-2 border">Конверсии</th>
+            <th className="p-2 border">Расход</th>
+            <th className="p-2 border">Подтвержденный доход</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {
+              tableData.map((el, index) => (
+                  <td key={uuid()} className="p-2 border">{el}</td>
+              ))
+            }
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  );
+
+  
+}
+
 const FooterTable = ({ fileName, fileData }) => {
   const [tableData, setTableData] = useState([]);
 
@@ -236,6 +311,9 @@ const App = () => {
           </React.Fragment>
         ))}
       </div>
+      <React.Fragment>
+          <AllStatisticTable filesData={fileData} />
+      </React.Fragment>
       {fileData.map(({ fileName, fileData }) => (
         <React.Fragment key={fileName}>
           {fileName.includes('statistic_pb') && (
