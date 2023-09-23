@@ -104,7 +104,7 @@ const AllStatisticTable = ({filesData}) => {
 
     allTablesData.splice(-2);
     const bigTable = allTablesData[allTablesData.length - 1];
-    tableDataArray[4] = (+bigTable[bigTable.length - 1][0].split(" ")[0] - spendingsAll) + " руб.";
+    tableDataArray[4] = (parseInt(bigTable[bigTable.length - 1][0].split(" ")[0].replace(/\s/g, "")) - spendingsAll) + " руб.";
       }
     })
     setTableData(tableDataArray);
