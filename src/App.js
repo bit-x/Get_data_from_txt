@@ -89,7 +89,7 @@ const AllStatisticTable = ({filesData}) => {
         } else {
           tableDataArray[0] += parseFloat(balance.replace(/[^\d,]/g, '').replace(',', '.'));
           tableDataArray[1] += +impr.replace(/\s/g, "");
-          tableDataArray[2] += +clicks.split(':')[1];
+          tableDataArray[2] += +clicks.split(':')[1].replace(/[^\d,]/g, '');
           tableDataArray[3] += !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10);
           tableDataArray[4] += spendings;
           setSpendingsAll(tableDataArray[4]);
