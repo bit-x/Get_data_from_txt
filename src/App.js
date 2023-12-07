@@ -63,7 +63,7 @@ const FileData = ({ fileName, fileData }) => {
         </div>
         <div className="flex mb-2">
           <span className="font-semibold">Расход:</span>
-          <span className="ml-2">{spend && parseFloat(spend.split(':')[1].replace(/[^\d,]/g, '').replace(',', '.')) * 1.2}</span>
+          <span className="ml-2">{spend && (parseFloat(spend.split(':')[1].replace(/[^\d,]/g, '').replace(',', '.')) * 1.2).toFixed(2)}</span>
         </div>
       </div>
     </div>
