@@ -83,9 +83,6 @@ const AllStatisticTable = ({filesData}) => {
         const entries = lastLine.split('||').map(entry => entry.trim());
         const [date, impressions, clicks, conversions, spend, balance] = entries;
         const spendings = parseFloat(spend.split(':')[1].replace(/[^\d,]/g, '').replace(',', '.')) * 1.2; // adding 20% to spendings
-
-        console.log('original - ', spend, '\n', 'additional - ', spendings)
-
         const impr = impressions.split(':')[1];
         if (tableDataArray.length === 0) {
           tableDataArray = [ parseFloat(balance.replace(/[^\d,]/g, '').replace(',', '.')), +impr.replace(/\s/g, ""), +clicks.split(':')[1], !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10), spendings];
@@ -123,6 +120,10 @@ const AllStatisticTable = ({filesData}) => {
 
     if (tableDataArray[0]) {
       tableDataArray[0] = tableDataArray[0].toFixed(2) + ' руб.';
+    }
+
+    if (tableDataArray[4]) {
+      tableDataArray[4] = tableDataArray[4].toFixed(2) + ' руб.';
     }
 
     setTableData(tableDataArray);
