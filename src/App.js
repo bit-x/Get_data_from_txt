@@ -31,7 +31,9 @@ const FileData = ({ fileName, fileData }) => {
   const entries = latestEntry.split('||').map(entry => entry.trim());
 
   // Получение значений из последней строки
-  const [date, impressions, clicks, conversions, spend] = entries;
+  const [date, impressions, clicks, conversions, spend, balance] = entries;
+
+  console.log(balance);
 
   return (
     <div className="bg-white rounded-md shadow-md p-4 mb-4 w-80">
@@ -42,6 +44,10 @@ const FileData = ({ fileName, fileData }) => {
         <div className="flex mb-2">
           <span className="font-semibold">Дата и время:</span>
           <span className="ml-2">{getNormalDate(date)}</span>
+        </div>
+        <div className="flex mb-2">
+          <span className="font-semibold">Баланс:</span>
+          <span className="ml-2">{balance && balance.split(':')[1]}</span>
         </div>
         <div className="flex mb-2">
           <span className="font-semibold">Показы:</span>
@@ -57,7 +63,7 @@ const FileData = ({ fileName, fileData }) => {
         </div>
         <div className="flex mb-2">
           <span className="font-semibold">Расход:</span>
-          <span className="ml-2">{spend && spend.split(':')[1]}</span>
+          <span className="ml-2">{spend && parseFloat(spend.split(':')[1].replace(/[^\d,]/g, '').replace(',', '.')) * 1.2}</span>
         </div>
       </div>
     </div>
@@ -75,17 +81,21 @@ const AllStatisticTable = ({filesData}) => {
         const lines = fileData.split('\n');
         const lastLine = lines[lines.length - 2]; // Игнорируем последнюю пустую строку
         const entries = lastLine.split('||').map(entry => entry.trim());
-        const [date, impressions, clicks, conversions, spend] = entries;
-        const spendings = spend.split(':')[1];
+        const [date, impressions, clicks, conversions, spend, balance] = entries;
+        const spendings = parseFloat(spend.split(':')[1].replace(/[^\d,]/g, '').replace(',', '.')) * 1.2; // adding 20% to spendings
+
+        console.log('original - ', spend, '\n', 'additional - ', spendings)
+
         const impr = impressions.split(':')[1];
         if (tableDataArray.length === 0) {
-          tableDataArray = [+impr.replace(/\s/g, ""), +clicks.split(':')[1], !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10), parseFloat(spendings.replace(',', '.'))];
+          tableDataArray = [ parseFloat(balance.replace(/[^\d,]/g, '').replace(',', '.')), +impr.replace(/\s/g, ""), +clicks.split(':')[1], !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10), spendings];
         } else {
-          tableDataArray[0] += +impr.replace(/\s/g, "");
-          tableDataArray[1] += +clicks.split(':')[1];
-          tableDataArray[2] += !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10);
-          tableDataArray[3] += parseFloat(spendings.replace(',', '.'));
-          setSpendingsAll(tableDataArray[3]);
+          tableDataArray[0] += parseFloat(balance.replace(/[^\d,]/g, '').replace(',', '.'));
+          tableDataArray[1] += +impr.replace(/\s/g, "");
+          tableDataArray[2] += +clicks.split(':')[1];
+          tableDataArray[3] += !conversions.split(':')[1].includes(',') ? +conversions.split(':')[1] : parseInt(conversions.split(':')[1].replace(",", ""), 10);
+          tableDataArray[4] += spendings;
+          setSpendingsAll(tableDataArray[4]);
         }
       } else {
     const allTablesData = [[]]
@@ -107,9 +117,14 @@ const AllStatisticTable = ({filesData}) => {
     const currentNumber = bigTable[bigTable.length - 1][0].split(" ");
     currentNumber.pop();
     
-    tableDataArray[4] = (parseInt(currentNumber.join('')) - spendingsAll) + " руб.";
+    tableDataArray[5] = (parseInt(currentNumber.join('')) - spendingsAll) + " руб.";
       }
     })
+
+    if (tableDataArray[0]) {
+      tableDataArray[0] = tableDataArray[0].toFixed(2) + ' руб.';
+    }
+
     setTableData(tableDataArray);
   }, [tableData]);
 
@@ -120,6 +135,7 @@ const AllStatisticTable = ({filesData}) => {
       <table className="w-full table-auto border-collapse">
         <thead>
           <tr>
+            <th className="p-2 border">Баланс</th>
             <th className="p-2 border">Показы</th>
             <th className="p-2 border">Клики</th>
             <th className="p-2 border">Конверсии</th>
@@ -271,7 +287,7 @@ const App = () => {
 
   const handleLogin = () => {
     // Перенаправление на страницу аутентификации Dropbox OAuth
-    window.location.href = 'https://www.dropbox.com/oauth2/authorize?client_id=kf86a9u7u66m4lz&response_type=token&redirect_uri=https://statistic-from-txt.vercel.app'; // Вот тут после redirect_uri= напишите ваш сайт куда вы залили этот проект ||| то есть вам надо заменить https://get-data-from-txt.vercel.app на свою ссылку
+    window.location.href = 'https://www.dropbox.com/oauth2/authorize?client_id=kf86a9u7u66m4lz&response_type=token&redirect_uri=https://statistic-from-txt.vercel.app';  // --- https://statistic-from-txt.vercel.app ---- Вот тут после redirect_uri= напишите ваш сайт куда вы залили этот проект ||| то есть вам надо заменить https://get-data-from-txt.vercel.app на свою ссылку
   };
 
   const handleOAuthCallback = () => {
@@ -293,7 +309,7 @@ const App = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 max-w-[1750px]">
       <h1 className="text-3xl font-bold text-center mb-8">Статистика</h1>
 
       {!isLoggedIn ? (
@@ -307,14 +323,15 @@ const App = () => {
       {error !== "" && (
         <h1 className="text-3xl font-bold text-center mt-4 text-red-600">{error}</h1>
       )}
-      <div className="flex flex-wrap just justify-center gap-4">
-        {fileData.map(({ fileName, fileData }) => (
-          <React.Fragment key={fileName}>
-            {!fileName.includes('statistic_pb') && (
-              <FileData fileName={fileName} fileData={fileData} />
-            )}
-          </React.Fragment>
-        ))}
+      <div className="flex flex-wrap justify-center gap-4">
+        {fileData
+            .filter(({ fileName }) => !fileName.includes('statistic_pb'))
+            .sort((a, b) => a.fileName.localeCompare(b.fileName))
+            .map(({ fileName, fileData }) => (
+                <React.Fragment key={fileName}>
+                  <FileData fileName={fileName} fileData={fileData} />
+                </React.Fragment>
+            ))}
       </div>
       <React.Fragment>
           <AllStatisticTable filesData={fileData} />
