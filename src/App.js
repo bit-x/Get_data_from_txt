@@ -114,7 +114,7 @@ const AllStatisticTable = ({filesData}) => {
     const currentNumber = bigTable[bigTable.length - 1][0].split(" ");
     currentNumber.pop();
     
-    tableDataArray[5] = (parseInt(currentNumber.join('')) - spendingsAll) + " руб.";
+    tableDataArray[5] = (parseInt(currentNumber.join('')) - spendingsAll).toFixed(2) + " руб.";
       }
     })
 
