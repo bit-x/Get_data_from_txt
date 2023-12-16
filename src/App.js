@@ -33,7 +33,7 @@ const FileData = ({ fileName, fileData }) => {
   // Получение значений из последней строки
   const [date, impressions, clicks, conversions, spend, balance] = entries;
 
-  console.log(balance);
+  const isBalanceLow = balance ? (parseFloat(balance.replace(/[^\d,]/g, '').replace(',', '.')) < 1000) : false;
 
   return (
     <div className="bg-white rounded-md shadow-md p-4 mb-4 w-80">
@@ -45,7 +45,7 @@ const FileData = ({ fileName, fileData }) => {
           <span className="font-semibold">Дата и время:</span>
           <span className="ml-2">{getNormalDate(date)}</span>
         </div>
-        <div className="flex mb-2">
+        <div className="flex mb-2" style={isBalanceLow ? {color: 'red'} : {}}>
           <span className="font-semibold">Баланс:</span>
           <span className="ml-2">{balance && balance.split(':')[1]}</span>
         </div>
@@ -288,7 +288,7 @@ const App = () => {
 
   const handleLogin = () => {
     // Перенаправление на страницу аутентификации Dropbox OAuth
-    window.location.href = 'https://www.dropbox.com/oauth2/authorize?client_id=kf86a9u7u66m4lz&response_type=token&redirect_uri=https://statistic-from-txt.vercel.app';  // --- https://statistic-from-txt.vercel.app ---- Вот тут после redirect_uri= напишите ваш сайт куда вы залили этот проект ||| то есть вам надо заменить https://get-data-from-txt.vercel.app на свою ссылку
+    window.location.href = 'https://www.dropbox.com/oauth2/authorize?client_id=kf86a9u7u66m4lz&response_type=token&redirect_uri=http://localhost:3000';  // --- https://statistic-from-txt.vercel.app ---- Вот тут после redirect_uri= напишите ваш сайт куда вы залили этот проект ||| то есть вам надо заменить https://get-data-from-txt.vercel.app на свою ссылку
   };
 
   const handleOAuthCallback = () => {
